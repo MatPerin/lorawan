@@ -76,6 +76,8 @@ SimpleEndDeviceLoraPhy::Send (Ptr<Packet> packet, LoraTxParameters txParams,
   LoraTag tag;
   packet->RemovePacketTag (tag);
   tag.SetSpreadingFactor (txParams.sf);
+  tag.SetFrequency (frequencyMHz);
+  tag.SetDuration (duration.GetSeconds ());
   packet->AddPacketTag (tag);
 
   // Send the packet over the channel

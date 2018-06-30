@@ -72,6 +72,13 @@ public:
   double GetReceivePower () const;
 
   /**
+   * Read the time on air duration of this packet.
+   *
+   * \return This tag's packet duration.
+   */
+  double GetDuration () const;
+
+  /**
    * Set which Spreading Factor this packet was transmitted with.
    *
    * \param sf The Spreading Factor.
@@ -84,6 +91,13 @@ public:
    * \param sf The Spreading Factor.
    */
   void SetDestroyedBy (uint8_t sf);
+
+  /**
+   * Set the duration of this packet.
+   *
+   * \param duration The duration, in seconds.
+   */
+  void SetDuration (double duration);
 
   /**
    * Set the power this packet was received with.
@@ -129,6 +143,7 @@ private:
   uint8_t m_dataRate; //!< The Data Rate that needs to be used to send this
                       //!packet.
   double m_frequency; //!< The frequency of this packet
+  double m_duration; //!< The duration of the packet
 };
 } // namespace ns3
 #endif
