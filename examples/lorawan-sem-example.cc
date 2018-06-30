@@ -40,9 +40,6 @@ int interfered = 0;
 int received = 0;
 int underSensitivity = 0;
 
-// Output control
-bool buildingsEnabled = false;
-
 std::ofstream receptionPathsFile;
 
 /**********************
@@ -204,14 +201,6 @@ PrintEndDevices (NodeContainer endDevices, NodeContainer gateways, std::string f
       int sf = int(mac->GetDataRate ());
       Vector pos = position->GetPosition ();
       spreadingFactorFile << pos.x << " " << pos.y << " " << sf << std::endl;
-    }
-  // Also print the gateways
-  for (NodeContainer::Iterator j = gateways.Begin (); j != gateways.End (); ++j)
-    {
-      Ptr<Node> object = *j;
-      Ptr<MobilityModel> position = object->GetObject<MobilityModel> ();
-      Vector pos = position->GetPosition ();
-      spreadingFactorFile << pos.x << " " << pos.y << " GW" << std::endl;
     }
   spreadingFactorFile.close ();
 }
