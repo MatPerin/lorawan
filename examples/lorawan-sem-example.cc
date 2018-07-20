@@ -177,9 +177,9 @@ void PrintSimulationTime (void)
 
 void
 OccupiedReceptionPaths (int oldValue, int newValue) {
-  receptionPathsFile.open ("occupiedReceptionPaths.dat", std::ofstream::app);
+  receptionPathsFile.open ("occupiedReceptionPaths", std::ofstream::app);
   receptionPathsFile << Simulator::Now().GetSeconds() << " " << newValue
-                             << std::endl;
+                     << std::endl;
   receptionPathsFile.close ();
 }
 
@@ -209,7 +209,7 @@ void
 PrintPacketTracker (void) {
   // Print the packetTracker contents
   std::ofstream packetTrackerFile;
-  packetTrackerFile.open ("packets.dat");
+  packetTrackerFile.open ("packets");
 
   std::map<Ptr<Packet const>, PacketStatus>::iterator i;
   for (i = packetTracker.begin (); i != packetTracker.end (); i++)
@@ -275,7 +275,7 @@ PrintPerformances (void) {
     double(noMoreReceivers)/(nDevices - underSensitivity);
 
   std::ofstream performances;
-  performances.open ("performances.dat");
+  performances.open ("performances");
 
   performances << receivedProbGivenAboveSensitivity << " " <<
     interferedProbGivenAboveSensitivity << " " <<
@@ -315,12 +315,12 @@ int main (int argc, char *argv[])
   LogComponentEnable("SimpleEndDeviceLoraPhy", LOG_LEVEL_DEBUG);
 
   // Empty logging files
-  receptionPathsFile.open ("occupiedReceptionPaths.dat");
+  receptionPathsFile.open ("occupiedReceptionPaths");
   receptionPathsFile.close ();
 
   /***********
-  *  Setup  *
-  ***********/
+   *  Setup  *
+   ***********/
 
   // Create the time value from the period
   Time appPeriod = Seconds (appPeriodSeconds);
@@ -334,8 +334,8 @@ int main (int argc, char *argv[])
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
 
   /************************
-  *  Create the channel  *
-  ************************/
+   *  Create the channel  *
+   ************************/
 
   // Create the lora channel object
   Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel> ();
@@ -347,8 +347,8 @@ int main (int argc, char *argv[])
   Ptr<LoraChannel> channel = CreateObject<LoraChannel> (loss, delay);
 
   /************************
-  *  Create the helpers  *
-  ************************/
+   *  Create the helpers  *
+   ************************/
 
   // Create the LoraPhyHelper
   LoraPhyHelper phyHelper = LoraPhyHelper ();
@@ -361,8 +361,8 @@ int main (int argc, char *argv[])
   LoraHelper helper = LoraHelper ();
 
   /************************
-  *  Create End Devices  *
-  ************************/
+   *  Create End Devices  *
+   ************************/
 
   // Create a set of nodes
   NodeContainer endDevices;
@@ -400,8 +400,8 @@ int main (int argc, char *argv[])
     }
 
   /*********************
-  *  Create Gateways  *
-  *********************/
+   *  Create Gateways  *
+   *********************/
 
   // Create the gateway nodes (allocate them uniformely on the disc)
   NodeContainer gateways;
@@ -428,8 +428,8 @@ int main (int argc, char *argv[])
   helper.Install (phyHelper, macHelper, gateways);
 
   /************************
-  *  Configure Gateways  *
-  ************************/
+   *  Configure Gateways  *
+   ************************/
 
   // Install reception paths on gateways
   for (NodeContainer::Iterator j = gateways.Begin (); j != gateways.End (); j++)
@@ -463,14 +463,14 @@ int main (int argc, char *argv[])
     }
 
   /**********************************************
-  *  Set up the end device's spreading factor  *
-  **********************************************/
+   *  Set up the end device's spreading factor  *
+   **********************************************/
 
   macHelper.SetSpreadingFactorsUp (endDevices, gateways, channel);
 
   /*********************************************
-  *  Install applications on the end devices  *
-  *********************************************/
+   *  Install applications on the end devices  *
+   *********************************************/
 
   Time appStopTime = Seconds (simulationTime);
   PeriodicSenderHelper appHelper = PeriodicSenderHelper ();
@@ -483,10 +483,10 @@ int main (int argc, char *argv[])
   /**********************
    * Print output files *
    *********************/
-  PrintEndDevices (endDevices, gateways, "endDevices.dat");
+  PrintEndDevices (endDevices, gateways, "endDevices");
 
   /****************
-  *  Simulation  *
+   *  Simulation  *
   ****************/
 
   Simulator::Stop (appStopTime + Hours (2));
