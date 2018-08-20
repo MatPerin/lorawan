@@ -168,6 +168,13 @@ public:
    * \return The data rate this device uses when transmitting.
    */
   uint8_t GetDataRate (void);
+  
+  /**
+   * Get the transmission power this end device is set to use.
+   *
+   * \return The transmission power this device uses when transmitting.
+   */
+  uint8_t GetTransmissionPower (void);
 
   /**
    * Set the network address of this device.
