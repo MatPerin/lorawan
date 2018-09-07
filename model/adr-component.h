@@ -56,38 +56,38 @@ namespace ns3 {
 
     private:
 
-      void AdrImplementation(uint8_t *newDataRate,
-                             uint8_t *newTxPower,
-                             Ptr<EndDeviceStatus> status);
+    void AdrImplementation(uint8_t *newDataRate,
+                           uint8_t *newTxPower,
+                           Ptr<EndDeviceStatus> status);
 
-      uint8_t SfToDr (uint8_t sf);
+    uint8_t SfToDr (uint8_t sf);
 
-      double TxPowerToSNR (double transmissionPower);
+    double TxPowerToSNR (double transmissionPower);
 
-      double GetMaxTxFromGateways (EndDeviceStatus::GatewayList gwList);
+    double GetMaxTxFromGateways (EndDeviceStatus::GatewayList gwList);
 
-      double GetAverageTxFromGateways (EndDeviceStatus::GatewayList gwList);
+    double GetAverageTxFromGateways (EndDeviceStatus::GatewayList gwList);
 
-      double GetReceivedPower (EndDeviceStatus::GatewayList gwList);
+    double GetReceivedPower (EndDeviceStatus::GatewayList gwList);
 
-      double GetMaxSNR (EndDeviceStatus::ReceivedPacketList packetList,
-                        uint8_t historyRange);
+    double GetMaxSNR (EndDeviceStatus::ReceivedPacketList packetList,
+                      uint8_t historyRange);
 
-      double GetAverageSNR (EndDeviceStatus::ReceivedPacketList packetList,
-                            uint8_t historyRange);
+    double GetAverageSNR (EndDeviceStatus::ReceivedPacketList packetList,
+                          uint8_t historyRange);
 
-      int GetTxPowerIndex (int txPower);
+    int GetTxPowerIndex (int txPower);
 
-      //TX power from gateways policy:
+    //TX power from gateways policy:
       //0 - max TX power between all connected GW
       //1 - average TX power considering all connected GW
       const bool tpAveraging = 0;
 
       //Number of previous packets to consider
-      const uint8_t historyRange = 20;
+    const uint8_t historyRange = 1;
 
-      //Received SNR history policy:
-      //0 - max SNR between the latest historyRange packets
+    //Received SNR history policy:
+    //0 - max SNR between the latest historyRange packets
       //1 - average SNR between the latest historyRange packets
       const bool historyAveraging = 0;
 
