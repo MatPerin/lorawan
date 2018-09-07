@@ -32,26 +32,24 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("ComplexLorawanNetworkExample");
 
 // Network settings
-int nDevices = 200;
+int nDevices = 1000;
 int gatewayRings = 1;
 int nGateways = 3 * gatewayRings * gatewayRings - 3 * gatewayRings + 1;
-double radius = 7500;
-double gatewayRadius = 7500 / ((gatewayRings - 1) * 2 + 1);
-double simulationTime = 120000;
-int appPeriodSeconds = 600;
+double radius = 6300;
+double gatewayRadius = 6300 / ((gatewayRings - 1) * 2 + 1);
+int appPeriodSeconds = 1000;
+double simulationTime = appPeriodSeconds * 20;
 std::vector<int> sfQuantity (6);
-
-int noMoreReceivers = 0;
-int interfered = 0;
-int received = 0;
-int underSensitivity = 0;
 
 // Output control
 bool printEDs = true;
 bool buildingsEnabled = false;
 
+Time lastPrintTime = Seconds(0);
+
 void
-PrintEndDevices (NodeContainer endDevices, NodeContainer gateways, std::string filename)
+PrintEndDevices (NodeContainer endDevices, NodeContainer gateways,
+                 std::string filename, LoraHelper helper)
 {
   const char * c = filename.c_str ();
   std::ofstream spreadingFactorFile;
@@ -70,14 +68,6 @@ PrintEndDevices (NodeContainer endDevices, NodeContainer gateways, std::string f
       //Vector pos = position->GetPosition ();
       spreadingFactorFile << sf << std::endl;
     }
-  // Also print the gateways
-  //for (NodeContainer::Iterator j = gateways.Begin (); j != gateways.End (); ++j)
-    //{
-      //Ptr<Node> object = *j;
-      //Ptr<MobilityModel> position = object->GetObject<MobilityModel> ();
-      //Vector pos = position->GetPosition ();
-      //spreadingFactorFile << pos.x << " " << pos.y << " GW" << std::endl;
-    //}
   spreadingFactorFile.close ();
 
   int n = Simulator::Now().GetMinutes();
@@ -86,7 +76,11 @@ PrintEndDevices (NodeContainer endDevices, NodeContainer gateways, std::string f
   s << "endDevices_" << n << ".dat";
   std::string query(s.str());
 
-  Simulator::Schedule (Seconds (simulationTime/20), &PrintEndDevices, endDevices, gateways, query);
+  Simulator::Schedule (Seconds (appPeriodSeconds/3), &PrintEndDevices,
+                       endDevices, gateways, query, helper);
+
+  helper.CountPhyPackets(lastPrintTime, Simulator::Now ());
+  lastPrintTime = Simulator::Now ();
 }
 
 int main (int argc, char *argv[])
@@ -111,8 +105,8 @@ int main (int argc, char *argv[])
   // LogComponentEnable("GatewayLoraPhy", LOG_LEVEL_ALL);
   // LogComponentEnable("LoraInterferenceHelper", LOG_LEVEL_ALL);
   // LogComponentEnable("LoraMac", LOG_LEVEL_ALL);
-  //LogComponentEnable("EndDeviceLoraMac", LOG_LEVEL_ALL);
-  //LogComponentEnable("GatewayLoraMac", LOG_LEVEL_ALL);
+  // LogComponentEnable("EndDeviceLoraMac", LOG_LEVEL_ALL);
+  // LogComponentEnable("GatewayLoraMac", LOG_LEVEL_ALL);
   // LogComponentEnable("LogicalLoraChannelHelper", LOG_LEVEL_ALL);
   // LogComponentEnable("LogicalLoraChannel", LOG_LEVEL_ALL);
   // LogComponentEnable("LoraHelper", LOG_LEVEL_ALL);
@@ -123,6 +117,8 @@ int main (int argc, char *argv[])
   // LogComponentEnable("LoraMacHeader", LOG_LEVEL_ALL);
   // LogComponentEnable("LoraFrameHeader", LOG_LEVEL_ALL);
   //LogComponentEnable("EndDeviceStatus", LOG_LEVEL_ALL);
+  // LogComponentEnable("NetworkScheduler", LOG_LEVEL_ALL);
+  // LogComponentEnable("AdrComponent", LOG_LEVEL_ALL);
 
   //LogComponentEnableAll(LOG_PREFIX_NODE);
   //LogComponentEnableAll(LOG_PREFIX_TIME);
@@ -155,7 +151,7 @@ int main (int argc, char *argv[])
   loss->SetReference (1, 7.7);
 
   Ptr<RandomPropagationLossModel> randomLoss = CreateObject<RandomPropagationLossModel> ();
-  randomLoss->SetAttribute("Variable", StringValue("ns3::UniformRandomVariable[Min=0|Max=4]"));
+  randomLoss->SetAttribute("Variable", StringValue("ns3::UniformRandomVariable[Min=0|Max=2]"));
   loss->SetNext(randomLoss);
 
   Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
@@ -266,7 +262,7 @@ int main (int argc, char *argv[])
   if (printEDs)
     {
       PrintEndDevices (endDevices, gateways,
-                       "src/lorawan/examples/endDevices_before.dat");
+                       "src/lorawan/examples/endDevices_before.dat", helper);
     }
 
   /**************************
@@ -289,7 +285,8 @@ int main (int argc, char *argv[])
    *  Simulation  *
   ****************/
 
-  Simulator::Stop (appStopTime + Hours (2));
+  Time simulationStopTime = appStopTime + Minutes (15);
+  Simulator::Stop (simulationStopTime);
 
   // PrintSimulationTime ();
 
@@ -301,10 +298,12 @@ int main (int argc, char *argv[])
   if (printEDs)
     {
       PrintEndDevices (endDevices, gateways,
-                       "src/lorawan/examples/endDevices_after.dat");
+                       "src/lorawan/examples/endDevices_after.dat", helper);
     }
 
   Simulator::Destroy ();
+
+  helper.CountPhyPackets(Seconds (0), Time::Max ());
 
   return 0;
 }
