@@ -67,61 +67,60 @@ namespace ns3 {
 
     //Execute the ADR algotithm only if the request bit is set
     if(fHdr.GetAdr())
-    {
-      if(status->GetReceivedPacketList().size() < historyRange)
-        NS_LOG_ERROR ("Not enough packets received by this device for the algorithm to work");
-      else
       {
-        NS_LOG_DEBUG("New ADR request");
-
-        //The device request an ADR tuning, so it is going to require answering
-        status->m_reply.needsReply = true;
-
-        //Get the SF used by the device
-        uint8_t spreadingFactor = status->GetFirstReceiveWindowSpreadingFactor();
-
-        //Get the device transmission power (dBm)
-        uint8_t transmissionPower = status->GetMac()->GetTransmissionPower();
-
-        //New parameters for the end-device
-        uint8_t newDataRate;
-        uint8_t newTxPower;
-
-        //ADR Algorithm
-        AdrImplementation(&newDataRate,
-                          &newTxPower,
-                          status);
-
-        if(newDataRate != SfToDr(spreadingFactor) || newTxPower != transmissionPower)
-        {
-          //Create a list with mandatory channel indexes
-          int channels[] = {1, 2, 3};
-          std::list<int> enabledChannels(channels,
-                                         channels + sizeof(channels) /
-                                         sizeof(int));
-
-          //Repetitions Setting
-          const int rep = 1;
-
-          NS_LOG_DEBUG ("Sending LinkAdrReq with DR = "<<(unsigned)newDataRate<<" and TP = "<<(unsigned)newTxPower<<" dBm");
-
-          status->m_reply.frameHeader.AddLinkAdrReq(newDataRate,
-                                                    GetTxPowerIndex(newTxPower),
-                                                    enabledChannels,
-                                                    rep);
-          status->m_reply.frameHeader.SetAsDownlink();
-          status->m_reply.macHeader.SetMType(LoraMacHeader::UNCONFIRMED_DATA_DOWN);
-        }
+        if (status->GetReceivedPacketList().size() < historyRange)
+          NS_LOG_ERROR ("Not enough packets received by this device for the algorithm to work");
         else
-        {
-          NS_LOG_DEBUG("Skipped request");
-        }
+          {
+            NS_LOG_DEBUG("New ADR request");
+
+            //Get the SF used by the device
+            uint8_t spreadingFactor = status->GetFirstReceiveWindowSpreadingFactor();
+
+            //Get the device transmission power (dBm)
+            uint8_t transmissionPower = status->GetMac()->GetTransmissionPower();
+
+            //New parameters for the end-device
+            uint8_t newDataRate;
+            uint8_t newTxPower;
+
+            //ADR Algorithm
+            AdrImplementation(&newDataRate,
+                              &newTxPower,
+                              status);
+
+            if(newDataRate != SfToDr(spreadingFactor) || newTxPower != transmissionPower)
+              {
+                //Create a list with mandatory channel indexes
+                int channels[] = {1, 2, 3};
+                std::list<int> enabledChannels(channels,
+                                               channels + sizeof(channels) /
+                                               sizeof(int));
+
+                //Repetitions Setting
+                const int rep = 1;
+
+                NS_LOG_DEBUG ("Sending LinkAdrReq with DR = "<<(unsigned)newDataRate<<" and TP = "<<(unsigned)newTxPower<<" dBm");
+
+                status->m_reply.frameHeader.AddLinkAdrReq(newDataRate,
+                                                          GetTxPowerIndex(newTxPower),
+                                                          enabledChannels,
+                                                          rep);
+                status->m_reply.frameHeader.SetAsDownlink();
+                status->m_reply.macHeader.SetMType(LoraMacHeader::UNCONFIRMED_DATA_DOWN);
+
+                status->m_reply.needsReply = true;
+              }
+            else
+              {
+                NS_LOG_DEBUG("Skipped request");
+              }
+          }
       }
-    }
     else
-    {
+      {
         // Do nothing
-    }
+      }
   }
 
   void AdrComponent::OnFailedReply (Ptr<EndDeviceStatus> status,
@@ -131,8 +130,8 @@ namespace ns3 {
   }
 
   void AdrComponent::AdrImplementation(uint8_t *newDataRate,
-                         uint8_t *newTxPower,
-                         Ptr<EndDeviceStatus> status)
+                                       uint8_t *newTxPower,
+                                       Ptr<EndDeviceStatus> status)
   {
     //Compute the maximum or median SNR, based on the boolean value historyAveraging
     double m_SNR;
@@ -182,23 +181,23 @@ namespace ns3 {
     //(note that the SF is not incremented as this particular algorithm
     //expects the node itself to raise its SF whenever necessary).
     while(steps > 0 && spreadingFactor > min_spreadingFactor)
-    {
-      spreadingFactor--;
-      steps--;
-      NS_LOG_DEBUG ("Decreased SF by 1");
-    }
+      {
+        spreadingFactor--;
+        steps--;
+        NS_LOG_DEBUG ("Decreased SF by 1");
+      }
     while(steps > 0 && transmissionPower > min_transmissionPower)
-    {
-      transmissionPower -= 2;
-      steps--;
-      NS_LOG_DEBUG ("Decreased Ptx by 2");
-    }
+      {
+        transmissionPower -= 2;
+        steps--;
+        NS_LOG_DEBUG ("Decreased Ptx by 2");
+      }
     while(steps < 0 && transmissionPower < max_transmissionPower)
-    {
-      transmissionPower += 2;
-      steps++;
-      NS_LOG_DEBUG ("Increased Ptx by 2");
-    }
+      {
+        transmissionPower += 2;
+        steps++;
+        NS_LOG_DEBUG ("Increased Ptx by 2");
+      }
 
     *newDataRate = SfToDr(spreadingFactor);
     *newTxPower = transmissionPower;
@@ -207,7 +206,7 @@ namespace ns3 {
   uint8_t AdrComponent::SfToDr(uint8_t sf)
   {
     switch (sf)
-    {
+      {
       case 12:
         return 0;
         break;
@@ -226,7 +225,7 @@ namespace ns3 {
       default:
         return 5;
         break;
-    }
+      }
   }
 
   double AdrComponent::TxPowerToSNR (double transmissionPower)
@@ -242,10 +241,10 @@ namespace ns3 {
     double max = it->second.rxPower;
 
     for(; it != gwList.end(); it++)
-    {
-      if(it->second.rxPower > max)
-        max = it->second.rxPower;
-    }
+      {
+        if(it->second.rxPower > max)
+          max = it->second.rxPower;
+      }
 
     return max;
   }
@@ -256,10 +255,10 @@ namespace ns3 {
     double sum = 0;
 
     for(EndDeviceStatus::GatewayList::iterator it = gwList.begin(); it != gwList.end(); it++)
-    {
-      NS_LOG_DEBUG("Gateway at " << it->first <<" has TP " << it->second.rxPower);
-      sum += it->second.rxPower;
-    }
+      {
+        NS_LOG_DEBUG("Gateway at " << it->first <<" has TP " << it->second.rxPower);
+        sum += it->second.rxPower;
+      }
 
     double average = sum / gwList.size();
 
@@ -286,15 +285,15 @@ namespace ns3 {
     double max = TxPowerToSNR(GetReceivedPower(it->second.gwList));
 
     for(int i = 0; i < historyRange; i++, it++)
-    {
-      m_SNR = TxPowerToSNR(GetReceivedPower(it->second.gwList));
+      {
+        m_SNR = TxPowerToSNR(GetReceivedPower(it->second.gwList));
 
-      NS_LOG_DEBUG("Received power: " << GetReceivedPower(it->second.gwList));
-      NS_LOG_DEBUG("m_SNR = " << m_SNR);
+        NS_LOG_DEBUG("Received power: " << GetReceivedPower(it->second.gwList));
+        NS_LOG_DEBUG("m_SNR = " << m_SNR);
 
-      if(m_SNR > max)
-        max = m_SNR;
-    }
+        if(m_SNR > max)
+          max = m_SNR;
+      }
 
     NS_LOG_DEBUG ("SNR (max) = " << max);
 
@@ -310,14 +309,14 @@ namespace ns3 {
     //Take elements from the list starting at the end
     auto it = packetList.rbegin();
     for(int i = 0; i < historyRange; i++, it++)
-    {
-      m_SNR = TxPowerToSNR(GetReceivedPower(it->second.gwList));
+      {
+        m_SNR = TxPowerToSNR(GetReceivedPower(it->second.gwList));
 
-      NS_LOG_DEBUG("Received power: " << GetReceivedPower(it->second.gwList));
-      NS_LOG_DEBUG("m_SNR = " << m_SNR);
+        NS_LOG_DEBUG("Received power: " << GetReceivedPower(it->second.gwList));
+        NS_LOG_DEBUG("m_SNR = " << m_SNR);
 
-      sum += m_SNR;
-    }
+        sum += m_SNR;
+      }
 
     double average = sum / historyRange;
 
