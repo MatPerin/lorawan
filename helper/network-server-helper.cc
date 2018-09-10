@@ -126,15 +126,15 @@ namespace ns3 {
 
     // Add Confirmed Messages support
     Ptr<ConfirmedMessagesComponent> ackSupport =
-      Create<ConfirmedMessagesComponent> ();
+      CreateObject<ConfirmedMessagesComponent> ();
     netServer->AddComponent (ackSupport);
 
     // Add LinkCheck support
-    Ptr<LinkCheckComponent> linkCheckSupport = Create<LinkCheckComponent> ();
+    Ptr<LinkCheckComponent> linkCheckSupport = CreateObject<LinkCheckComponent> ();
     netServer->AddComponent (linkCheckSupport);
 
     //Add LinkAdrReq support
-    Ptr<AdrComponent> adrComponentSupport = Create<AdrComponent> ();
+    Ptr<AdrComponent> adrComponentSupport = CreateObject<AdrComponent> ();
     netServer->AddComponent (adrComponentSupport);
   }
 } // namespace ns3
