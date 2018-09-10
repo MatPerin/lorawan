@@ -33,8 +33,25 @@ namespace ns3 {
   TypeId AdrComponent::GetTypeId (void)
   {
     static TypeId tid = TypeId ("ns3::AdrComponent")
-    .SetGroupName ("lorawan")
-    .AddConstructor<AdrComponent> ();
+      .SetGroupName ("lorawan")
+      .AddConstructor<AdrComponent> ()
+      .SetParent<NetworkControllerComponent> ()
+      .AddAttribute ("GwPowerAveraging",
+                     "Whether to average the received power of gateways (true) or to use the maximum (false)",
+                     BooleanValue (false),
+                     MakeBooleanAccessor (&AdrComponent::tpAveraging),
+                     MakeBooleanChecker ())
+      .AddAttribute ("HistoryRange",
+                     "Number of packets to use for averaging",
+                     UintegerValue (1),
+                     MakeUintegerAccessor (&AdrComponent::historyRange),
+                     MakeUintegerChecker<uint8_t> ())
+      .AddAttribute ("HistoryAveraging",
+                     "Whether to average SNRs of multiple packets",
+                     BooleanValue (true),
+                     MakeBooleanAccessor (&AdrComponent::historyAveraging),
+                     MakeBooleanChecker ())
+      ;
     return tid;
   }
 

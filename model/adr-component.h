@@ -35,26 +35,25 @@ namespace ns3 {
 
   class AdrComponent : public NetworkControllerComponent
   {
-    public:
+  public:
 
-      static TypeId GetTypeId (void);
+    static TypeId GetTypeId (void);
 
-      //Constructor
-      AdrComponent ();
-      //Destructor
-      virtual ~AdrComponent ();
+    //Constructor
+    AdrComponent ();
+    //Destructor
+    virtual ~AdrComponent ();
 
-      void OnReceivedPacket (Ptr<const Packet> packet,
-                             Ptr<EndDeviceStatus> status,
+    void OnReceivedPacket (Ptr<const Packet> packet,
+                           Ptr<EndDeviceStatus> status,
+                           Ptr<NetworkStatus> networkStatus);
+
+    void BeforeSendingReply (Ptr<EndDeviceStatus> status,
                              Ptr<NetworkStatus> networkStatus);
 
-      void BeforeSendingReply (Ptr<EndDeviceStatus> status,
-                               Ptr<NetworkStatus> networkStatus);
-
-      void OnFailedReply (Ptr<EndDeviceStatus> status,
-                          Ptr<NetworkStatus> networkStatus);
-
-    private:
+    void OnFailedReply (Ptr<EndDeviceStatus> status,
+                        Ptr<NetworkStatus> networkStatus);
+  private:
 
     void AdrImplementation(uint8_t *newDataRate,
                            uint8_t *newTxPower,
@@ -79,40 +78,40 @@ namespace ns3 {
     int GetTxPowerIndex (int txPower);
 
     //TX power from gateways policy:
-      //0 - max TX power between all connected GW
-      //1 - average TX power considering all connected GW
-      const bool tpAveraging = 0;
+    //0 - max TX power between all connected GW
+    //1 - average TX power considering all connected GW
+    bool tpAveraging;
 
-      //Number of previous packets to consider
-    const uint8_t historyRange = 1;
+    //Number of previous packets to consider
+    uint8_t historyRange;
 
     //Received SNR history policy:
     //0 - max SNR between the latest historyRange packets
-      //1 - average SNR between the latest historyRange packets
-      const bool historyAveraging = 0;
+    //1 - average SNR between the latest historyRange packets
+    bool historyAveraging;
 
-      //SF lower limit
-      const int min_spreadingFactor = 7;
+    //SF lower limit
+    const int min_spreadingFactor = 7;
 
-      //Minimum transmission power (dBm) (Europe)
-      const int min_transmissionPower = 2;
+    //Minimum transmission power (dBm) (Europe)
+    const int min_transmissionPower = 2;
 
-      //Maximum transmission power (dBm) (Europe)
-      const int max_transmissionPower = 14;
+    //Maximum transmission power (dBm) (Europe)
+    const int max_transmissionPower = 14;
 
-      //Device specific SNR margin (dB)
-      const int offset = 10;
+    //Device specific SNR margin (dB)
+    const int offset = 10;
 
-      //Bandwidth (Hz)
-      const int B = 125000;
+    //Bandwidth (Hz)
+    const int B = 125000;
 
-      //Noise Figure (dB)
-      const int NF = 6;
+    //Noise Figure (dB)
+    const int NF = 6;
 
-      //Vector containing the required SNR for the 6 allowed SF levels
-      //ranging from 7 to 12 (the SNR values are in dB).
-      double treshold[6] = {-20.0, -17.5, -15.0, -12.5, -10.0, -7.5};
-};
+    //Vector containing the required SNR for the 6 allowed SF levels
+    //ranging from 7 to 12 (the SNR values are in dB).
+    double treshold[6] = {-20.0, -17.5, -15.0, -12.5, -10.0, -7.5};
+  };
 }
 
 #endif

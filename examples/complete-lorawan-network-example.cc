@@ -24,6 +24,7 @@
 #include "ns3/propagation-loss-model.h"
 #include "ns3/periodic-sender-helper.h"
 #include "ns3/command-line.h"
+#include "ns3/config.h"
 #include <algorithm>
 #include <ctime>
 
@@ -41,11 +42,29 @@ int appPeriodSeconds = 1000;
 double simulationTime = appPeriodSeconds * 20;
 std::vector<int> sfQuantity (6);
 
+bool gwPowerAveraging = false;
+bool historyAveraging = false;
+uint8_t historyRange = 1;
+std::string channelVariability ("2");
+
 // Output control
-bool printEDs = true;
+  bool printEDs = true;
 bool buildingsEnabled = false;
 
 Time lastPrintTime = Seconds(0);
+
+void
+PrintPerformances (LoraHelper helper)
+{
+  Simulator::Schedule (Seconds (appPeriodSeconds), &PrintPerformances,
+                       helper);
+
+  if (lastPrintTime != Simulator::Now ())
+    {
+      helper.CountPhyPackets(lastPrintTime, Simulator::Now ());
+      lastPrintTime = Simulator::Now ();
+    }
+}
 
 void
 PrintEndDevices (NodeContainer endDevices, NodeContainer gateways,
@@ -78,10 +97,9 @@ PrintEndDevices (NodeContainer endDevices, NodeContainer gateways,
 
   Simulator::Schedule (Seconds (appPeriodSeconds/3), &PrintEndDevices,
                        endDevices, gateways, query, helper);
-
-  helper.CountPhyPackets(lastPrintTime, Simulator::Now ());
-  lastPrintTime = Simulator::Now ();
 }
+
+
 
 int main (int argc, char *argv[])
 {
@@ -94,7 +112,10 @@ int main (int argc, char *argv[])
   cmd.AddValue ("simulationTime", "The time for which to simulate", simulationTime);
   cmd.AddValue ("appPeriod", "The period in seconds to be used by periodically transmitting applications", appPeriodSeconds);
   cmd.AddValue ("printEDs", "Whether or not to print a file containing the ED's positions", printEDs);
-
+  cmd.AddValue ("gwPowerAveraging", "ns3::AdrComponent::GwPowerAveraging");
+  cmd.AddValue ("HistoryAveraging", "ns3::AdrComponent::HistoryAveraging");
+  cmd.AddValue ("HistoryRange", "ns3::AdrComponent::HistoryRange");
+  cmd.AddValue ("channelVariability", "Maximum channel random loss", channelVariability);
   cmd.Parse (argc, argv);
 
   // Set up logging
@@ -151,7 +172,7 @@ int main (int argc, char *argv[])
   loss->SetReference (1, 7.7);
 
   Ptr<RandomPropagationLossModel> randomLoss = CreateObject<RandomPropagationLossModel> ();
-  randomLoss->SetAttribute("Variable", StringValue("ns3::UniformRandomVariable[Min=0|Max=2]"));
+  randomLoss->SetAttribute("Variable", StringValue(std::string("ns3::UniformRandomVariable[Min=0|Max=") + channelVariability + std::string("]")));
   loss->SetNext(randomLoss);
 
   Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
@@ -288,7 +309,7 @@ int main (int argc, char *argv[])
   Time simulationStopTime = appStopTime + Minutes (15);
   Simulator::Stop (simulationStopTime);
 
-  // PrintSimulationTime ();
+  PrintPerformances (helper);
 
   Simulator::Run ();
 
@@ -303,7 +324,8 @@ int main (int argc, char *argv[])
 
   Simulator::Destroy ();
 
-  helper.CountPhyPackets(Seconds (0), Time::Max ());
+  // Print summary of whole simulation
+  // helper.CountPhyPackets(Seconds (0), Time::Max ());
 
   return 0;
 }
