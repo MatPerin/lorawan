@@ -100,7 +100,7 @@ namespace ns3 {
     const int max_transmissionPower = 14;
 
     //Device specific SNR margin (dB)
-    const int offset = 10;
+    // const int offset = 10;
 
     //Bandwidth (Hz)
     const int B = 125000;
