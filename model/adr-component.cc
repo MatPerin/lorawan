@@ -43,9 +43,9 @@ namespace ns3 {
                      MakeBooleanChecker ())
       .AddAttribute ("HistoryRange",
                      "Number of packets to use for averaging",
-                     UintegerValue (1),
-                     MakeUintegerAccessor (&AdrComponent::historyRange),
-                     MakeUintegerChecker<uint8_t> ())
+                     IntegerValue (1),
+                     MakeIntegerAccessor (&AdrComponent::historyRange),
+                     MakeIntegerChecker<int> (0, 100))
       .AddAttribute ("HistoryAveraging",
                      "Whether to average SNRs of multiple packets",
                      BooleanValue (true),
@@ -85,54 +85,54 @@ namespace ns3 {
     //Execute the ADR algotithm only if the request bit is set
     if(fHdr.GetAdr())
       {
-        if (status->GetReceivedPacketList().size() < historyRange)
-          NS_LOG_ERROR ("Not enough packets received by this device for the algorithm to work");
+        if (int(status->GetReceivedPacketList().size()) < historyRange)
+          NS_LOG_ERROR ("Not enough packets received by this device ("<<status->GetReceivedPacketList().size()<<") for the algorithm to work (need " << historyRange << ")");
         else
-          {
-            NS_LOG_DEBUG("New ADR request");
-
-            //Get the SF used by the device
-            uint8_t spreadingFactor = status->GetFirstReceiveWindowSpreadingFactor();
-
-            //Get the device transmission power (dBm)
-            uint8_t transmissionPower = status->GetMac()->GetTransmissionPower();
-
-            //New parameters for the end-device
-            uint8_t newDataRate;
-            uint8_t newTxPower;
-
-            //ADR Algorithm
-            AdrImplementation(&newDataRate,
-                              &newTxPower,
-                              status);
-
-            if(newDataRate != SfToDr(spreadingFactor) || newTxPower != transmissionPower)
               {
-                //Create a list with mandatory channel indexes
-                int channels[] = {1, 2, 3};
-                std::list<int> enabledChannels(channels,
-                                               channels + sizeof(channels) /
-                                               sizeof(int));
+                NS_LOG_DEBUG("New ADR request");
 
-                //Repetitions Setting
-                const int rep = 1;
+                //Get the SF used by the device
+                uint8_t spreadingFactor = status->GetFirstReceiveWindowSpreadingFactor();
 
-                NS_LOG_DEBUG ("Sending LinkAdrReq with DR = "<<(unsigned)newDataRate<<" and TP = "<<(unsigned)newTxPower<<" dBm");
+                //Get the device transmission power (dBm)
+                uint8_t transmissionPower = status->GetMac()->GetTransmissionPower();
 
-                status->m_reply.frameHeader.AddLinkAdrReq(newDataRate,
-                                                          GetTxPowerIndex(newTxPower),
-                                                          enabledChannels,
-                                                          rep);
-                status->m_reply.frameHeader.SetAsDownlink();
-                status->m_reply.macHeader.SetMType(LoraMacHeader::UNCONFIRMED_DATA_DOWN);
+                //New parameters for the end-device
+                uint8_t newDataRate;
+                uint8_t newTxPower;
 
-                status->m_reply.needsReply = true;
+                //ADR Algorithm
+                AdrImplementation(&newDataRate,
+                                  &newTxPower,
+                                  status);
+
+                if(newDataRate != SfToDr(spreadingFactor) || newTxPower != transmissionPower)
+                  {
+                    //Create a list with mandatory channel indexes
+                    int channels[] = {1, 2, 3};
+                    std::list<int> enabledChannels(channels,
+                                                   channels + sizeof(channels) /
+                                                   sizeof(int));
+
+                    //Repetitions Setting
+                    const int rep = 1;
+
+                    NS_LOG_DEBUG ("Sending LinkAdrReq with DR = "<<(unsigned)newDataRate<<" and TP = "<<(unsigned)newTxPower<<" dBm");
+
+                    status->m_reply.frameHeader.AddLinkAdrReq(newDataRate,
+                                                              GetTxPowerIndex(newTxPower),
+                                                              enabledChannels,
+                                                              rep);
+                    status->m_reply.frameHeader.SetAsDownlink();
+                    status->m_reply.macHeader.SetMType(LoraMacHeader::UNCONFIRMED_DATA_DOWN);
+
+                    status->m_reply.needsReply = true;
+                  }
+                else
+                  {
+                    NS_LOG_DEBUG("Skipped request");
+                  }
               }
-            else
-              {
-                NS_LOG_DEBUG("Skipped request");
-              }
-          }
       }
     else
       {
@@ -293,7 +293,7 @@ namespace ns3 {
   }
 
   double AdrComponent::GetMaxSNR (EndDeviceStatus::ReceivedPacketList packetList,
-                                  uint8_t historyRange)
+                                  int historyRange)
   {
     double m_SNR;
 
@@ -318,7 +318,7 @@ namespace ns3 {
   }
 
   double AdrComponent::GetAverageSNR (EndDeviceStatus::ReceivedPacketList packetList,
-                                      uint8_t historyRange)
+                                      int historyRange)
   {
     double sum = 0;
     double m_SNR;

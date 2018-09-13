@@ -70,10 +70,10 @@ namespace ns3 {
     double GetReceivedPower (EndDeviceStatus::GatewayList gwList);
 
     double GetMaxSNR (EndDeviceStatus::ReceivedPacketList packetList,
-                      uint8_t historyRange);
+                      int historyRange);
 
     double GetAverageSNR (EndDeviceStatus::ReceivedPacketList packetList,
-                          uint8_t historyRange);
+                          int historyRange);
 
     int GetTxPowerIndex (int txPower);
 
@@ -83,7 +83,7 @@ namespace ns3 {
     bool tpAveraging;
 
     //Number of previous packets to consider
-    uint8_t historyRange;
+    int historyRange;
 
     //Received SNR history policy:
     //0 - max SNR between the latest historyRange packets

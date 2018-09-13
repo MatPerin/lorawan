@@ -43,8 +43,8 @@ double simulationTime = appPeriodSeconds * 20;
 std::vector<int> sfQuantity (6);
 
 bool gwPowerAveraging = false;
-bool historyAveraging = false;
-uint8_t historyRange = 1;
+bool historyAveraging = true;
+int historyRange = 1;
 std::string channelVariability ("2");
 
 // Output control
@@ -120,7 +120,7 @@ int main (int argc, char *argv[])
 
   Config::SetDefault( "ns3::AdrComponent::GwPowerAveraging", BooleanValue(gwPowerAveraging));
   Config::SetDefault( "ns3::AdrComponent::HistoryAveraging", BooleanValue(historyAveraging));
-  Config::SetDefault( "ns3::AdrComponent::HistoryRange", UintegerValue(historyRange));
+  Config::SetDefault( "ns3::AdrComponent::HistoryRange", IntegerValue(historyRange));
 
   // Set up logging
   LogComponentEnable ("ComplexLorawanNetworkExample", LOG_LEVEL_ALL);
