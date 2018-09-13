@@ -112,11 +112,15 @@ int main (int argc, char *argv[])
   cmd.AddValue ("simulationTime", "The time for which to simulate", simulationTime);
   cmd.AddValue ("appPeriod", "The period in seconds to be used by periodically transmitting applications", appPeriodSeconds);
   cmd.AddValue ("printEDs", "Whether or not to print a file containing the ED's positions", printEDs);
-  cmd.AddValue ("gwPowerAveraging", "ns3::AdrComponent::GwPowerAveraging");
-  cmd.AddValue ("HistoryAveraging", "ns3::AdrComponent::HistoryAveraging");
-  cmd.AddValue ("HistoryRange", "ns3::AdrComponent::HistoryRange");
+  cmd.AddValue ("gwPowerAveraging", "Gateway power averaging", gwPowerAveraging);
+  cmd.AddValue ("HistoryAveraging", "History averaging", historyAveraging);
+  cmd.AddValue ("HistoryRange", "History Range", historyRange);
   cmd.AddValue ("channelVariability", "Maximum channel random loss", channelVariability);
   cmd.Parse (argc, argv);
+
+  Config::SetDefault( "ns3::AdrComponent::GwPowerAveraging", BooleanValue(gwPowerAveraging));
+  Config::SetDefault( "ns3::AdrComponent::HistoryAveraging", BooleanValue(historyAveraging));
+  Config::SetDefault( "ns3::AdrComponent::HistoryRange", UintegerValue(historyRange));
 
   // Set up logging
   LogComponentEnable ("ComplexLorawanNetworkExample", LOG_LEVEL_ALL);
